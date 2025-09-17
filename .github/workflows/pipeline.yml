@@ -1,21 +1,26 @@
-name: CI Pipeline
+name: Run CTF from GitLab
 
 on:
   push:
     branches:
-      - main
+      - '**'   # runs on all branches
 
 jobs:
-  run-script:
+  run-dbt:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      - name: Checkout GitHub repo
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
+      - name: Clone GitLab repo (CTF)
+        run: |
+          git clone --branch master http://$GITLAB_USER:$GITLAB_TOKEN@taiga.datametica.com/Akash.Pawar1/ctf.git ctf-repo
+        env:
+          GITLAB_USER: ${{ secrets.GITLAB_USER }}
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
 
-      - name: Run hello.py
-        run: python src/hello.py
+      - name: Run CTF script
+        run: |
+          cd ctf-repo/src
+          python3 ctf-entry.py
